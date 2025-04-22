@@ -1,0 +1,27 @@
+# Java
+*.class
+
+# Maven
+/target
+/logs
+*.log
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.env
+*.zip
+*.jar
+*.war
+*.db
