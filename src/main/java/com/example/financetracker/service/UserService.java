@@ -2,6 +2,8 @@ package com.example.financetracker.service;
 
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.UserRepository;
+
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,9 +26,17 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public User authenticate(String username) {
-        return userRepository.findByUsername(username).orElseThrow();
+    public User authenticate(String username, String rawPassword) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
+            throw new BadCredentialsException("Invalid password");
+        }
+
+        return user;
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) {
