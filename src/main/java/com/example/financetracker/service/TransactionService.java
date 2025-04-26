@@ -16,13 +16,13 @@ public class TransactionService {
         this.transactionRepository = transactionRepository;
     }
 
-    public Transaction addTransaction(User user, String category, double amount, String type) {
+    public Transaction addTransaction(User user, String category, double amount, String type, LocalDateTime timestamp) {
         Transaction t = Transaction.builder()
                 .user(user)
                 .category(category)
                 .amount(amount)
                 .type(type)
-                .timestamp(LocalDateTime.now())
+                .timestamp(timestamp != null ? timestamp : LocalDateTime.now())
                 .build();
         return transactionRepository.save(t);
     }

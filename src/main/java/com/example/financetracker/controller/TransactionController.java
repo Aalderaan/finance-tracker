@@ -2,16 +2,25 @@ package com.example.financetracker.controller;
 
 import com.example.financetracker.dto.SummaryRequestDTO;
 import com.example.financetracker.dto.SummaryResponseDTO;
+import com.example.financetracker.dto.TransactionResponseDTO;
 import com.example.financetracker.model.Transaction;
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.UserRepository;
 import com.example.financetracker.service.SummaryService;
 import com.example.financetracker.service.TransactionService;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -26,31 +35,46 @@ public class TransactionController {
         this.userRepository = userRepository;
         this.summaryService = summaryService;
     }
-
+    
+    
     @PostMapping
-    public ResponseEntity<Transaction> addTransaction(@AuthenticationPrincipal UserDetails userDetails,
-                                                       @RequestBody TransactionRequest request) {
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
-        return ResponseEntity.ok(
-                transactionService.addTransaction(user, request.category(), request.amount(), request.type()));
+    public ResponseEntity<TransactionResponseDTO> addTransaction(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody TransactionRequest request) {
+
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found in the database"));
+
+        Transaction transaction = transactionService.addTransaction(user, request.category(), request.amount(), request.type(), request.timestamp());
+
+        TransactionResponseDTO responseDTO = new TransactionResponseDTO(
+                transaction.getId(),
+                transaction.getCategory(),
+                transaction.getAmount(),
+                transaction.getType(),
+                transaction.getTimestamp()
+        );
+
+        return ResponseEntity.ok(responseDTO);
     }
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getTransactions(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
         return ResponseEntity.ok(transactionService.getUserTransactions(user));
     }
     
     @PostMapping("/summary")
     public ResponseEntity<SummaryResponseDTO> getSummary(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody SummaryRequestDTO request) {
+            @Valid @RequestBody SummaryRequestDTO request) {
 
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         return ResponseEntity.ok(summaryService.getSummary(user, request));
     }
 
 
-    public record TransactionRequest(String category, double amount, String type) {}
+    public record TransactionRequest(@NotBlank String category, @Positive double amount, 
+    		@NotBlank String type, LocalDateTime timestamp) {}
 }

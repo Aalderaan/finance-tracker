@@ -1,17 +1,13 @@
 package com.example.financetracker.unit;
 
-import com.example.financetracker.controller.AuthController;
-import com.example.financetracker.controller.AuthController.AuthRequest;
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.UserRepository;
 import com.example.financetracker.service.UserService;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
