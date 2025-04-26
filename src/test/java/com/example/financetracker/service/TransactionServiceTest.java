@@ -1,4 +1,4 @@
-package com.example.financetracker.unit;
+package com.example.financetracker.service;
 
 import com.example.financetracker.model.Transaction;
 import com.example.financetracker.model.User;
@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -98,5 +99,56 @@ public class TransactionServiceTest {
         assertEquals(2, result.size());
         assertTrue(result.contains(tx1));
         assertTrue(result.contains(tx2));
+    }
+    
+    @Test
+    void updateTransaction_shouldUpdateExistingTransaction() {
+        Long transactionId = 1L;
+        Transaction existing = Transaction.builder()
+                .id(transactionId)
+                .category("Food")
+                .amount(20.0)
+                .type("EXPENSE")
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        Transaction updated = Transaction.builder()
+                .category("Transport")
+                .amount(50.0)
+                .type("EXPENSE")
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
+        when(transactionRepository.save(any(Transaction.class))).thenReturn(existing);
+
+        Transaction result = transactionService.updateTransaction(transactionId, updated.getCategory(), 
+        		updated.getAmount(), updated.getType(), updated.getTimestamp());
+
+        assertEquals("Transport", result.getCategory());
+        assertEquals(50.0, result.getAmount());
+        assertEquals(existing.getType(), result.getType());
+        assertEquals(existing.getTimestamp(), result.getTimestamp());
+        verify(transactionRepository, times(1)).save(existing);
+    }
+
+    @Test
+    void deleteTransaction_shouldDeleteTransactionById() {
+        Long transactionId = 2L;
+        Transaction existing = Transaction.builder()
+                .id(transactionId)
+                .category("Food")
+                .amount(35.0)
+                .type("EXPENSE")
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
+
+        transactionService.deleteTransaction(transactionId);
+
+        verify(transactionRepository, times(1)).findById(transactionId);
+        verify(transactionRepository, times(1)).delete(existing); 
+        verifyNoMoreInteractions(transactionRepository);
     }
 }

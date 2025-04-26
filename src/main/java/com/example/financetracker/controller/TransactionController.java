@@ -9,6 +9,12 @@ import com.example.financetracker.repository.UserRepository;
 import com.example.financetracker.service.SummaryService;
 import com.example.financetracker.service.TransactionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
@@ -72,6 +78,66 @@ public class TransactionController {
         User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
 
         return ResponseEntity.ok(summaryService.getSummary(user, request));
+    }
+    
+    @Operation(summary = "Update a transaction by ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Transaction updated successfully"),
+        @ApiResponse(responseCode = "404", description = "Transaction not found")
+    })
+    @PutMapping("/{transactionId}")
+    public ResponseEntity<TransactionResponseDTO> updateTransaction(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(
+                name = "transactionId",
+                description = "ID of the transaction to update",
+                required = true,
+                in = ParameterIn.PATH
+            )
+            @PathVariable("transactionId") Long transactionId,
+            @Valid @RequestBody TransactionRequest request) {
+
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found in the database"));
+
+        Transaction transaction = transactionService.updateTransaction(
+                transactionId,
+                request.category(),
+                request.amount(),
+                request.type(),
+                request.timestamp()
+        );
+
+        TransactionResponseDTO responseDTO = new TransactionResponseDTO(
+                transaction.getId(),
+                transaction.getCategory(),
+                transaction.getAmount(),
+                transaction.getType(),
+                transaction.getTimestamp()
+        );
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    @Operation(summary = "Delete a transaction by ID")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "204", description = "Transaction deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Transaction not found")
+    })
+    @DeleteMapping("/{transactionId}")
+    public ResponseEntity<Void> deleteTransaction(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Parameter(
+                    name = "transactionId",
+                    description = "ID of the transaction",
+                    required = true,
+                    in = ParameterIn.PATH
+                )
+            
+            @PathVariable("transactionId") Long transactionId) {
+
+        transactionService.deleteTransaction(transactionId);
+        return ResponseEntity.noContent().build();
     }
 
 

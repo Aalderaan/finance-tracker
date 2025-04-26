@@ -1,6 +1,7 @@
 package com.example.financetracker.controller;
 
 import com.example.financetracker.model.User;
+import com.example.financetracker.security.JwtResponse;
 import com.example.financetracker.security.JwtService;
 import com.example.financetracker.service.UserService;
 
@@ -31,14 +32,11 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody AuthRequest request) {
         User user = userService.authenticate(request.getUsername(), request.getPassword());
-        if (user != null) {
             String token = jwtService.generateToken(user);
-            return ResponseEntity.ok(token);
+            return ResponseEntity.ok(new JwtResponse(token));
         }
-        return ResponseEntity.status(401).body("Invalid credentials");
-    }
 
 
     @Data

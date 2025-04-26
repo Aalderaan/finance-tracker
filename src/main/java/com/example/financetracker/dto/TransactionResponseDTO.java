@@ -1,11 +1,12 @@
 package com.example.financetracker.dto;
 
-import lombok.AllArgsConstructor;
+import lombok.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 @AllArgsConstructor
 public class TransactionResponseDTO {
     private Long id;
