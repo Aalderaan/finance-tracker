@@ -28,4 +28,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                                                         @Param("type") String type,
                                                         @Param("from") LocalDateTime from,
                                                         @Param("to") LocalDateTime to);
+    
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user = :user AND t.type = :type AND t.category = :category AND t.timestamp BETWEEN :from AND :to")
+    Double getTotalAmountByCategory(
+    		@Param("user") User user, 
+    		@Param("type") String type,
+    		@Param("category") String category,
+    		@Param("from") LocalDateTime from, 
+    		@Param("to") LocalDateTime to);
 }

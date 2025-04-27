@@ -25,10 +25,10 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody AuthRequest request) {
+    public ResponseEntity<JwtResponse> register(@Valid @RequestBody AuthRequest request) {
         User user = userService.register(request.getUsername(), request.getPassword());
         String token = jwtService.generateToken(user);
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @PostMapping("/login")

@@ -30,6 +30,13 @@ public class SummaryService {
                 .orElseThrow(() -> new IllegalArgumentException("No strategy found"))
                 .resolve(request);
 
+        if (request.getCategory()!= null && !request.getCategory().isBlank()) {
+            Double total = transactionRepository.getTotalAmountByCategory(
+                    user, request.getType(), request.getCategory(), range.from(), range.to());
+
+            return new SummaryResponseDTO(total != null ? total : 0.0, null);
+        }
+
         if (request.isByCategory()) {
             List<CategorySummaryDTO> byCategory = transactionRepository.getAmountGroupedByCategory(
                     user, request.getType(), range.from(), range.to());
@@ -42,7 +49,9 @@ public class SummaryService {
         } else {
             Double total = transactionRepository.getTotalAmountByTypeAndDateRange(
                     user, request.getType(), range.from(), range.to());
+
             return new SummaryResponseDTO(total != null ? total : 0.0, null);
         }
     }
+
 }
