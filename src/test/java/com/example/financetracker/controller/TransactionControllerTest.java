@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -118,27 +119,31 @@ public class TransactionControllerTest {
     @Test
     void updateTransaction_shouldReturnUpdatedTransaction() {
         User user = User.builder().username("testUser").build();
-        Transaction updatedTransaction = Transaction.builder()
-                .category("Updated")
+        LocalDateTime localDateTime = LocalDate.now().atStartOfDay();
+        Transaction transaction = Transaction.builder()
+                .category("TRANSPORT")
                 .amount(300.0)
                 .type("INCOME")
-                .timestamp(LocalDateTime.now())
+                .timestamp(localDateTime)
                 .build();
 
         UserDetails userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn("testUser");
         when(authenticatedUserService.getAuthenticatedUser(userDetails)).thenReturn(user);
         when(transactionService.updateTransaction(eq(1L), anyString(), anyDouble(), anyString(), any()))
-                .thenReturn(updatedTransaction);
+                .thenReturn(transaction);
 
         TransactionController.TransactionRequest request =
-                new TransactionController.TransactionRequest("Updated", 300.0, "INCOME", LocalDateTime.now());
+                new TransactionController.TransactionRequest("TRANSPORT", 300.0, "INCOME", localDateTime);
 
         ResponseEntity<TransactionResponseDTO> response = transactionController.updateTransaction(userDetails, 1L, request);
 
         assertTrue(response.getStatusCode().is2xxSuccessful());
         assertNotNull(response.getBody());
-        assertEquals("Updated", response.getBody().getCategory());
+        assertEquals("TRANSPORT", response.getBody().getCategory());
+        assertEquals(localDateTime, response.getBody().getTimestamp());
+        assertEquals(300.0, response.getBody().getAmount());
+        assertEquals("INCOME", response.getBody().getType());
     }
 
     @Test
@@ -151,5 +156,4 @@ public class TransactionControllerTest {
         assertEquals(204, response.getStatusCode().value());
         verify(transactionService, times(1)).deleteTransaction(1L);
     }
-
 }
