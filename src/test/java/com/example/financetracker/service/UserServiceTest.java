@@ -32,7 +32,7 @@ public class UserServiceTest {
 
     @Test
     void shouldReturnUser_whenUsernameExists() {
-        String username = "testuser";
+        String username = "testUser";
         String rawPassword = "password";
         String encodedPassword = new BCryptPasswordEncoder().encode(rawPassword);
 
@@ -52,13 +52,13 @@ public class UserServiceTest {
 
     @Test
     void shouldThrowException_whenUserNotFound() {
-        when(userRepository.findByUsername("notfound")).thenReturn(Optional.empty());
+        when(userRepository.findByUsername("notFound")).thenReturn(Optional.empty());
 
         UsernameNotFoundException thrown = assertThrows(
             UsernameNotFoundException.class,
-            () -> userService.authenticate("notfound", "incorrect")
+            () -> userService.authenticate("notFound", "incorrect")
         );
 
-        assertEquals("This user: notfound is not found in db", thrown.getMessage());
+        assertEquals("This user: notFound is not found in db", thrown.getMessage());
     }
 }

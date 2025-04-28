@@ -6,14 +6,12 @@ import com.example.financetracker.dto.TransactionResponseDTO;
 import com.example.financetracker.exception.ErrorResponse;
 import com.example.financetracker.model.Transaction;
 import com.example.financetracker.model.User;
-import com.example.financetracker.repository.UserRepository;
-import com.example.financetracker.security.JwtResponse;
+import com.example.financetracker.service.AuthenticatedUserService;
 import com.example.financetracker.service.SummaryService;
 import com.example.financetracker.service.TransactionService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,8 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -38,16 +34,17 @@ import java.util.List;
 @RequestMapping("/api/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
-    private final UserRepository userRepository;
     private final SummaryService summaryService;
+    private final AuthenticatedUserService authenticatedUserService;
 
-    public TransactionController(TransactionService transactionService, UserRepository userRepository, SummaryService summaryService) {
+    public TransactionController(TransactionService transactionService,
+                                 SummaryService summaryService,
+                                 AuthenticatedUserService authenticatedUserService) {
         this.transactionService = transactionService;
-        this.userRepository = userRepository;
         this.summaryService = summaryService;
+        this.authenticatedUserService = authenticatedUserService;
     }
-    
-    
+
     @Operation(summary = "Post a transaction")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Transaction added successfully", 
@@ -60,9 +57,7 @@ public class TransactionController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody TransactionRequest request) {
 
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found in the database"));
-
+        User user = authenticatedUserService.getAuthenticatedUser(userDetails);
         Transaction transaction = transactionService.addTransaction(user, request.category(), request.amount(), request.type(), request.timestamp());
 
         TransactionResponseDTO responseDTO = new TransactionResponseDTO(
@@ -83,16 +78,16 @@ public class TransactionController {
     })
     @GetMapping
     public ResponseEntity<List<Transaction>> getTransactions(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = authenticatedUserService.getAuthenticatedUser(userDetails);
         return ResponseEntity.ok(transactionService.getUserTransactions(user));
     }
     
     
     @Operation(summary = "Get transaction summary")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Summary retrived successfully", 
+        @ApiResponse(responseCode = "200", description = "Summary retrieved successfully",
         		content = @Content(array = @ArraySchema(schema = @Schema(implementation = SummaryResponseDTO.class)))),
-        @ApiResponse(responseCode = "200", description = "Summary retrived successfully", 
+        @ApiResponse(responseCode = "200", description = "Summary retrieved successfully",
         		content = @Content(schema = @Schema(implementation = SummaryResponseDTO.class))),
     })
     @PostMapping("/summary")
@@ -100,8 +95,7 @@ public class TransactionController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody SummaryRequestDTO request) {
 
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow(() -> new EntityNotFoundException("User not found"));
-
+        User user = authenticatedUserService.getAuthenticatedUser(userDetails);
         return ResponseEntity.ok(summaryService.getSummary(user, request));
     }
     
@@ -123,9 +117,6 @@ public class TransactionController {
             )
             @PathVariable("transactionId") Long transactionId,
             @Valid @RequestBody TransactionRequest request) {
-
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new EntityNotFoundException("Authenticated user not found in the database"));
 
         Transaction transaction = transactionService.updateTransaction(
                 transactionId,

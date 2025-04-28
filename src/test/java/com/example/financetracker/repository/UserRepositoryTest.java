@@ -1,10 +1,7 @@
-package com.example.financetracker.unit;
-
-
+package com.example.financetracker.repository;
 
 import com.example.financetracker.FinanceTrackerApplication;
 import com.example.financetracker.model.User;
-import com.example.financetracker.repository.UserRepository;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

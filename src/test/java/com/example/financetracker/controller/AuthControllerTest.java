@@ -1,4 +1,4 @@
-package com.example.financetracker.unit;
+package com.example.financetracker.controller;
 
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.UserRepository;
@@ -7,7 +7,6 @@ import com.example.financetracker.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +16,7 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 public class AuthControllerTest {
 
@@ -30,7 +30,7 @@ public class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        openMocks(this);
         userService = new UserService(userRepository, passwordEncoder);
     }
 
