@@ -1,11 +1,10 @@
-package com.example.financetracker.unit;
+package com.example.financetracker.service;
 
 
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.UserRepository;
-import com.example.financetracker.service.UserService;
 
 public class UserServiceTest {
 
@@ -61,6 +59,6 @@ public class UserServiceTest {
             () -> userService.authenticate("notfound", "incorrect")
         );
 
-        assertEquals("User not found", thrown.getMessage());
+        assertEquals("This user: notfound is not found in db", thrown.getMessage());
     }
 }

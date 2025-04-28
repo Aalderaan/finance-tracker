@@ -28,7 +28,7 @@ public class UserService implements UserDetailsService {
 
     public User authenticate(String username, String rawPassword) {
         User user = userRepository.findByUsername(username)
-            .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("This user: " + username + " is not found in db"));
 
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new BadCredentialsException("Invalid password");

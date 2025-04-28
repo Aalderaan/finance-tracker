@@ -1,10 +1,16 @@
 package com.example.financetracker.controller;
 
+import com.example.financetracker.exception.ErrorResponse;
 import com.example.financetracker.model.User;
 import com.example.financetracker.security.JwtResponse;
 import com.example.financetracker.security.JwtService;
 import com.example.financetracker.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -12,6 +18,8 @@ import lombok.*;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,13 +32,26 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
+    
+    @Operation(
+		    responses = {
+        @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
+        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PostMapping("/register")
     public ResponseEntity<JwtResponse> register(@Valid @RequestBody AuthRequest request) {
         User user = userService.register(request.getUsername(), request.getPassword());
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(new JwtResponse(token));
     }
-
+    
+    @Operation(
+    	    responses = {
+    	        @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
+    	        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+    	        @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    	    }
+    	)
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody AuthRequest request) {
         User user = userService.authenticate(request.getUsername(), request.getPassword());
