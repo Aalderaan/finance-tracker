@@ -47,10 +47,10 @@ public class TransactionController {
 
     @Operation(summary = "Post a transaction")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Transaction added successfully", 
-        		content = @Content(schema = @Schema(implementation = TransactionResponseDTO.class))),
-        @ApiResponse(responseCode = "404", description = "Transaction not found", 
-        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Transaction added successfully",
+                    content = @Content(schema = @Schema(implementation = TransactionResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Transaction not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
     public ResponseEntity<TransactionResponseDTO> addTransaction(
@@ -58,7 +58,8 @@ public class TransactionController {
             @Valid @RequestBody TransactionRequest request) {
 
         User user = authenticatedUserService.getAuthenticatedUser(userDetails);
-        Transaction transaction = transactionService.addTransaction(user, request.category(), request.amount(), request.type(), request.timestamp());
+        Transaction transaction = transactionService.addTransaction(user, request.category(),
+                request.amount(), request.type(), request.timestamp());
 
         TransactionResponseDTO responseDTO = new TransactionResponseDTO(
                 transaction.getId(),
@@ -73,22 +74,24 @@ public class TransactionController {
 
     @Operation(summary = "Get list of transactions")
     @ApiResponses(value = {
-    		@ApiResponse(responseCode = "200", description = "Transactions retrived successfully", 
-    		content = @Content(array = @ArraySchema(schema = @Schema(implementation = Transaction.class))))
+            @ApiResponse(responseCode = "200", description = "Transactions retrieved successfully",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Transaction.class)))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @GetMapping
     public ResponseEntity<List<Transaction>> getTransactions(@AuthenticationPrincipal UserDetails userDetails) {
         User user = authenticatedUserService.getAuthenticatedUser(userDetails);
         return ResponseEntity.ok(transactionService.getUserTransactions(user));
     }
-    
-    
+
+
     @Operation(summary = "Get transaction summary")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Summary retrieved successfully",
-        		content = @Content(array = @ArraySchema(schema = @Schema(implementation = SummaryResponseDTO.class)))),
-        @ApiResponse(responseCode = "200", description = "Summary retrieved successfully",
-        		content = @Content(schema = @Schema(implementation = SummaryResponseDTO.class))),
+            @ApiResponse(responseCode = "200", description = "Summary retrieved successfully",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = SummaryResponseDTO.class)))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping("/summary")
     public ResponseEntity<SummaryResponseDTO> getSummary(
@@ -98,22 +101,24 @@ public class TransactionController {
         User user = authenticatedUserService.getAuthenticatedUser(userDetails);
         return ResponseEntity.ok(summaryService.getSummary(user, request));
     }
-    
+
     @Operation(summary = "Update a transaction by ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Transaction updated successfully", 
-        		content = @Content(schema = @Schema(implementation = TransactionResponseDTO.class))),
-        @ApiResponse(responseCode = "404", description = "Transaction not found", 
-        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "200", description = "Transaction updated successfully",
+                    content = @Content(schema = @Schema(implementation = TransactionResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Transaction not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PutMapping("/{transactionId}")
     public ResponseEntity<TransactionResponseDTO> updateTransaction(
             @AuthenticationPrincipal UserDetails userDetails,
             @Parameter(
-                name = "transactionId",
-                description = "ID of the transaction to update",
-                required = true,
-                in = ParameterIn.PATH
+                    name = "transactionId",
+                    description = "ID of the transaction to update",
+                    required = true,
+                    in = ParameterIn.PATH
             )
             @PathVariable("transactionId") Long transactionId,
             @Valid @RequestBody TransactionRequest request) {
@@ -141,6 +146,8 @@ public class TransactionController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully",
                     content = @Content(schema = @Schema(implementation = TransactionResponseDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
             @ApiResponse(responseCode = "404", description = "Transaction not found",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
@@ -165,9 +172,11 @@ public class TransactionController {
 
     @Operation(summary = "Delete a transaction by ID")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "Transaction deleted successfully"),
-        @ApiResponse(responseCode = "404", description = "Transaction not found",
-        		content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            @ApiResponse(responseCode = "204", description = "Transaction deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Transaction not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<Void> deleteTransaction(
@@ -177,8 +186,8 @@ public class TransactionController {
                     description = "ID of the transaction",
                     required = true,
                     in = ParameterIn.PATH
-                )
-            
+            )
+
             @PathVariable("transactionId") Long transactionId) {
 
         transactionService.deleteTransaction(transactionId);
@@ -186,6 +195,7 @@ public class TransactionController {
     }
 
 
-    public record TransactionRequest(@NotBlank String category, @Positive double amount, 
-    		@NotBlank String type, LocalDateTime timestamp) {}
+    public record TransactionRequest(@NotBlank String category, @Positive double amount,
+                                     @NotBlank String type, LocalDateTime timestamp) {
+    }
 }

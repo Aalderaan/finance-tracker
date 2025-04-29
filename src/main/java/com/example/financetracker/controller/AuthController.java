@@ -19,8 +19,6 @@ import lombok.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -32,47 +30,46 @@ public class AuthController {
         this.jwtService = jwtService;
     }
 
-    
     @Operation(
-		    responses = {
-        @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
-        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
+                    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
     @PostMapping("/register")
     public ResponseEntity<JwtResponse> register(@Valid @RequestBody AuthRequest request) {
         User user = userService.register(request.getUsername(), request.getPassword());
         String token = jwtService.generateToken(user);
         return ResponseEntity.ok(new JwtResponse(token));
     }
-    
+
     @Operation(
-    	    responses = {
-    	        @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
-    	        @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-    	        @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    	    }
-    	)
+            responses = {
+                    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = JwtResponse.class))),
+                    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+                    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            }
+    )
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@Valid @RequestBody AuthRequest request) {
         User user = userService.authenticate(request.getUsername(), request.getPassword());
-            String token = jwtService.generateToken(user);
-            return ResponseEntity.ok(new JwtResponse(token));
-        }
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new JwtResponse(token));
+    }
 
 
     @Data
     public static class AuthRequest {
         @NotBlank(message = "Username must not be blank")
         @Pattern(
-            regexp = "^[A-Za-z\\d@$!%*?&]{6,20}$",
-            message = "Username must be 6-20 characters long and may contain letters, digits, and special characters"
+                regexp = "^[A-Za-z\\d@$!%*?&]{6,20}$",
+                message = "Username must be 6-20 characters long and may contain letters, digits, and special characters"
         )
         private String username;
 
         @NotBlank(message = "Password must not be blank")
         @Pattern(
-            regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,20}$",
-            message = "Password must be 6-20 characters, with at least one uppercase letter, one digit, and one special character"
+                regexp = "^(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{6,20}$",
+                message = "Password must be 6-20 characters, with at least one uppercase letter, one digit, and one special character"
         )
         private String password;
     }

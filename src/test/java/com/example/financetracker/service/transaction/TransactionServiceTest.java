@@ -85,7 +85,7 @@ public class TransactionServiceTest {
 
         verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
-    
+
     @Test
     void getUserTransactions_shouldReturnTransactionsForUser() {
         User user = User.builder().id(1L).username("john").build();
@@ -100,7 +100,7 @@ public class TransactionServiceTest {
         assertTrue(result.contains(tx1));
         assertTrue(result.contains(tx2));
     }
-    
+
     @Test
     void updateTransaction_shouldUpdateExistingTransaction() {
         Long transactionId = 1L;
@@ -122,8 +122,8 @@ public class TransactionServiceTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(existing);
 
-        Transaction result = transactionService.updateTransaction(transactionId, updated.getCategory(), 
-        		updated.getAmount(), updated.getType(), updated.getTimestamp());
+        Transaction result = transactionService.updateTransaction(transactionId, updated.getCategory(),
+                updated.getAmount(), updated.getType(), updated.getTimestamp());
 
         assertEquals("Transport", result.getCategory());
         assertEquals(50.0, result.getAmount());
@@ -148,7 +148,7 @@ public class TransactionServiceTest {
         transactionService.deleteTransaction(transactionId);
 
         verify(transactionRepository, times(1)).findById(transactionId);
-        verify(transactionRepository, times(1)).delete(existing); 
+        verify(transactionRepository, times(1)).delete(existing);
         verifyNoMoreInteractions(transactionRepository);
     }
 
