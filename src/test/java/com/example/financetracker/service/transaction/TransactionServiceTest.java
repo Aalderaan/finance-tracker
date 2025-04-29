@@ -1,8 +1,9 @@
-package com.example.financetracker.service;
+package com.example.financetracker.service.transaction;
 
 import com.example.financetracker.model.Transaction;
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.TransactionRepository;
+import com.example.financetracker.service.TransactionService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

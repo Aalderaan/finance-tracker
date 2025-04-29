@@ -29,6 +29,17 @@ public class TransactionService {
         return transactionRepository.save(t);
     }
 
+    public Transaction getTransactionById(User user, Long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found with id: " + transactionId));
+
+        if (!transaction.getUser().getId().equals(user.getId())) {
+            throw new EntityNotFoundException("You are not allowed to access this transaction");
+        }
+
+        return transaction;
+    }
+
     public List<Transaction> getUserTransactions(User user) {
         return transactionRepository.findByUser(user);
     }

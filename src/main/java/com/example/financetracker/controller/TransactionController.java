@@ -137,6 +137,32 @@ public class TransactionController {
         return ResponseEntity.ok(responseDTO);
     }
 
+    @Operation(summary = "Get a transaction by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Transaction retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = TransactionResponseDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Transaction not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<TransactionResponseDTO> getTransactionById(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @PathVariable Long id) {
+
+        User user = authenticatedUserService.getAuthenticatedUser(userDetails);
+        Transaction transaction = transactionService.getTransactionById(user, id);
+
+        TransactionResponseDTO responseDTO = new TransactionResponseDTO(
+                transaction.getId(),
+                transaction.getCategory(),
+                transaction.getAmount(),
+                transaction.getType(),
+                transaction.getTimestamp()
+        );
+
+        return ResponseEntity.ok(responseDTO);
+    }
+
     @Operation(summary = "Delete a transaction by ID")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "Transaction deleted successfully"),
