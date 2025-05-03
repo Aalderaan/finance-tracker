@@ -5,7 +5,11 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.*;
+
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SummaryRequestDTO {
 
     @NotBlank(message = "Transaction type must not be blank")
@@ -32,6 +36,5 @@ public class SummaryRequestDTO {
     private Integer lastMonths;
     
     private String category;
-
     private boolean byCategory;
 }

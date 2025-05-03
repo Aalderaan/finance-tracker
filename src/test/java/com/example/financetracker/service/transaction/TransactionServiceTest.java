@@ -1,9 +1,10 @@
-package com.example.financetracker.service;
+package com.example.financetracker.service.transaction;
 
 import com.example.financetracker.model.Transaction;
 import com.example.financetracker.model.User;
 import com.example.financetracker.repository.TransactionRepository;
 import com.example.financetracker.service.TransactionService;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,6 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TransactionServiceTest {
-
     private TransactionRepository transactionRepository;
     private TransactionService transactionService;
 
@@ -57,7 +57,7 @@ public class TransactionServiceTest {
     }
 
     @Test
-    void addTransactionWithNullTimeStemp_shouldSaveAndReturnTransaction() {
+    void addTransactionWithNullTimeStamp_shouldSaveAndReturnTransaction() {
         User user = User.builder().id(1L).username("john").build();
         String category = "Food";
         double amount = 50.0;
@@ -85,7 +85,7 @@ public class TransactionServiceTest {
 
         verify(transactionRepository, times(1)).save(any(Transaction.class));
     }
-    
+
     @Test
     void getUserTransactions_shouldReturnTransactionsForUser() {
         User user = User.builder().id(1L).username("john").build();
@@ -100,7 +100,7 @@ public class TransactionServiceTest {
         assertTrue(result.contains(tx1));
         assertTrue(result.contains(tx2));
     }
-    
+
     @Test
     void updateTransaction_shouldUpdateExistingTransaction() {
         Long transactionId = 1L;
@@ -122,8 +122,8 @@ public class TransactionServiceTest {
         when(transactionRepository.findById(transactionId)).thenReturn(Optional.of(existing));
         when(transactionRepository.save(any(Transaction.class))).thenReturn(existing);
 
-        Transaction result = transactionService.updateTransaction(transactionId, updated.getCategory(), 
-        		updated.getAmount(), updated.getType(), updated.getTimestamp());
+        Transaction result = transactionService.updateTransaction(transactionId, updated.getCategory(),
+                updated.getAmount(), updated.getType(), updated.getTimestamp());
 
         assertEquals("Transport", result.getCategory());
         assertEquals(50.0, result.getAmount());
@@ -148,7 +148,31 @@ public class TransactionServiceTest {
         transactionService.deleteTransaction(transactionId);
 
         verify(transactionRepository, times(1)).findById(transactionId);
-        verify(transactionRepository, times(1)).delete(existing); 
+        verify(transactionRepository, times(1)).delete(existing);
         verifyNoMoreInteractions(transactionRepository);
+    }
+
+    @Test
+    void updateTransaction_shouldThrowException_whenTransactionNotFound() {
+        Long transactionId = 100L;
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () ->
+                transactionService.updateTransaction(transactionId, "Transport", 100.0, "EXPENSE", LocalDateTime.now()));
+
+        verify(transactionRepository, times(1)).findById(transactionId);
+    }
+
+    @Test
+    void deleteTransaction_shouldThrowException_whenTransactionNotFound() {
+        Long transactionId = 100L;
+
+        when(transactionRepository.findById(transactionId)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () ->
+                transactionService.deleteTransaction(transactionId));
+
+        verify(transactionRepository, times(1)).findById(transactionId);
     }
 }
